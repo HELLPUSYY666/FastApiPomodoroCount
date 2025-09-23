@@ -1,0 +1,22 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:17.4
+    restart: always
+    shm_size: 128mb
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_USER: zakariyapolevchishikov
+      POSTGRES_DB: fast_api_db
+
+  cache:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+
