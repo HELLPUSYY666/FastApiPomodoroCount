@@ -1,3 +1,4 @@
-from models.tasks import Task, Category
-from models.user import UserProfile
-__all__ = ['Task', 'Category', 'UserProfile']
+from app.models.tasks import Category, Task
+from app.models.user import UserProfile
+
+__all__ = ["Task", "Category", "UserProfile"]

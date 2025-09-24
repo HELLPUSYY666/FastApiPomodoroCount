@@ -1,6 +1,7 @@
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
-from sqlalchemy import Column, Integer, String, ForeignKey
-from database import Base
+
+from app.infrastructure.database.database import Base
 
 
 class Task(Base):
@@ -15,7 +16,7 @@ class Task(Base):
 
 
 class Category(Base):
-    __tablename__ = 'Category'
+    __tablename__ = "Category"
     id: Mapped[int] = Column(Integer, primary_key=True)
     type: Mapped[str] = Column(String, nullable=True)
     name: Mapped[str] = Column(String, nullable=False)

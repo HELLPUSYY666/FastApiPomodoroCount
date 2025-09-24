@@ -1,8 +1,9 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from sqlalchemy.future import select
 from sqlalchemy import delete, update
-from models import Task
-from schema import TaskCreateSchema
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.future import select
+
+from app.models import Task
+from app.schema import TaskCreateSchema
 
 
 class TaskRepository:
@@ -34,13 +35,17 @@ class TaskRepository:
 
     async def delete_task(self, task_id: int, user_id: int) -> None:
         async with self.db_session_maker() as session:
-            await session.execute(delete(Task).where(Task.id == task_id, Task.user_id == user_id))
+            await session.execute(
+                delete(Task).where(Task.id == task_id, Task.user_id == user_id)
+            )
             await session.commit()
             await session.flush()
 
     async def update_task_name(self, task_id: int, name: str) -> Task:
         async with self.db_session_maker() as session:
-            await session.execute(update(Task).where(Task.id == task_id).values(name=name))
+            await session.execute(
+                update(Task).where(Task.id == task_id).values(name=name)
+            )
             await session.commit()
             result = await session.execute(select(Task).where(Task.id == task_id))
             task = result.scalar_one_or_none()

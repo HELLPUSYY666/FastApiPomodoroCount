@@ -1,11 +1,12 @@
 import json
-import redis.asyncio as redis
 from typing import List
-from schema.task import TaskSchema
+
+import redis.asyncio as redis
+
+from app.schema.task import TaskSchema
 
 
 class TaskCacheRepository:
-
     def __init__(self, cache_session: redis.Redis) -> None:
         self.cache_session = cache_session
 
@@ -16,9 +17,9 @@ class TaskCacheRepository:
         return [TaskSchema.model_validate(task) for task in json.loads(tasks_json)]
 
     async def set_all_tasks(
-        self,
-        tasks: list[TaskSchema],
-        key: str = "all_tasks"
+        self, tasks: list[TaskSchema], key: str = "all_tasks"
     ) -> None:
-        tasks_json = json.dumps([task.model_dump() for task in tasks], ensure_ascii=False)
+        tasks_json = json.dumps(
+            [task.model_dump() for task in tasks], ensure_ascii=False
+        )
         await self.cache_session.set(key, tasks_json, ex=60)

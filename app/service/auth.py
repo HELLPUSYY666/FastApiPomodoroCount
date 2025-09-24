@@ -3,19 +3,19 @@ import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 
-from client import GoogleClient, YandexClient
 from fastapi import HTTPException
 from jose import JWTError, jwt
-from models import UserProfile
-from repository import UserRepository
-from schema import UserCreateSchema, UserLoginSchema
 
+from app.client import GoogleClient, YandexClient
 from app.exception import (
     TokenExpiredException,
     TokenNotCorrectException,
     UserNotCorrectPasswordException,
     UserNotFoundException,
 )
+from app.models import UserProfile
+from app.repository import UserRepository
+from app.schema import UserCreateSchema, UserLoginSchema
 from app.settings import settings
 
 
