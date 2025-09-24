@@ -1,21 +1,22 @@
 import datetime
-from dataclasses import dataclass
 import uuid
-from jose import jwt, JWTError
-from fastapi import HTTPException
+from dataclasses import dataclass
+from datetime import timedelta
 
 from client import GoogleClient, YandexClient
-from exception import (
-    UserNotFoundException,
-    UserNotCorrectPasswordException,
-    TokenExpiredException,
-    TokenNotCorrectException
-)
+from fastapi import HTTPException
+from jose import JWTError, jwt
 from models import UserProfile
 from repository import UserRepository
-from schema import UserLoginSchema, UserCreateSchema
-from datetime import timedelta
-from settings import settings
+from schema import UserCreateSchema, UserLoginSchema
+
+from app.exception import (
+    TokenExpiredException,
+    TokenNotCorrectException,
+    UserNotCorrectPasswordException,
+    UserNotFoundException,
+)
+from app.settings import settings
 
 
 @dataclass
@@ -95,7 +96,7 @@ class AuthService:
         return jwt.encode(
             {"user_id": user_id, "expire": expires_date_unix},
             key=settings.JWT_SECRET_KEY,
-            algorithm=settings.JWT_ENCODE_ALGORITHM
+            algorithm=settings.JWT_ENCODE_ALGORITHM,
         )
 
     def get_user_id_from_access_token(self, access_token: str) -> int:
@@ -103,7 +104,7 @@ class AuthService:
             payload = jwt.decode(
                 access_token,
                 key=settings.JWT_SECRET_KEY,
-                algorithms=[settings.JWT_ENCODE_ALGORITHM]
+                algorithms=[settings.JWT_ENCODE_ALGORITHM],
             )
         except JWTError:
             raise TokenNotCorrectException

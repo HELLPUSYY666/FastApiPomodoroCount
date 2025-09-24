@@ -1,14 +1,14 @@
 import httpx
-from fastapi import Depends, HTTPException, Security, security
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
-from cache import get_redis_connection
 from client import GoogleClient, YandexClient
-from database import get_session_maker
-from exception import TokenExpiredException, TokenNotCorrectException
+from fastapi import Depends, HTTPException, Security, security
 from repository import TaskCacheRepository, TaskRepository, UserRepository
 from service import AuthService, TaskService, UserService
-from settings import settings
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from app.exception import TokenExpiredException, TokenNotCorrectException
+from app.settings import settings
+from cache import get_redis_connection
+from database import get_session_maker
 
 
 async def get_task_repository(

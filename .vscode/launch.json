@@ -1,18 +1,36 @@
+// {
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "name": "FastAPI: Uvicorn",
+//             "type": "python",
+//             "request": "launch",
+//             "module": "uvicorn",
+//             "args": [
+//                 "main:app",
+//                 "--reload",
+//                 "--host",
+//                 "localhost",
+//                 "--port",
+//                 "8000"
+//             ],
+//             "jinja": true,
+//             "justMyCode": false
+//         }
+//     ]
+// }
 {
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "FastAPI: Uvicorn",
+            "name": "FastAPI: Gunicorn",
             "type": "python",
             "request": "launch",
-            "module": "uvicorn",
+            "module": "gunicorn",
             "args": [
                 "main:app",
-                "--reload",
-                "--host",
-                "localhost",
-                "--port",
-                "8000"
+                "-c",
+                "gunicorn.conf.py"
             ],
             "jinja": true,
             "justMyCode": false
