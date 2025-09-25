@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     YANDEX_REDIRECT_URL: str = ""
     YANDEX_TOKEN_URL: str = "https://oauth.yandex.ru/token"
 
+    CELERY_REDIS_URL: str = "redis://:your_strong_password@localhost:6379/1"
+
+    from_email: str = "pzakariya@mail.ru"
+    SMTP_PORT: int = 465
+    SMTP_HOST: str = "smtp.mail.ru"
+    SMTP_PASSWORD: str = "57ZdNKZrJR5wEBXEIlA8"
+
     @property
     def db_url(self):
         return f"{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

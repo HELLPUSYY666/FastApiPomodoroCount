@@ -3,6 +3,7 @@ from fastapi import Depends, HTTPException, Security, security
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.client import GoogleClient, YandexClient
+from app.client.mail import MailClient
 from app.exception import TokenExpiredException, TokenNotCorrectException
 from app.infrastructure.cache import get_redis_connection
 from app.infrastructure.database import get_session_maker

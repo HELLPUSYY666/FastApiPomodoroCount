@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from jose import JWTError, jwt
 
 from app.client import GoogleClient, YandexClient
+from app.client.mail import MailClient as mail_client
 from app.exception import (
     TokenExpiredException,
     TokenNotCorrectException,
@@ -16,13 +17,13 @@ from app.exception import (
 from app.models import UserProfile
 from app.repository import UserRepository
 from app.schema import UserCreateSchema, UserLoginSchema
-from app.settings import settings
+from app.settings import Settings, settings
 
 
 @dataclass
 class AuthService:
     user_repository: UserRepository
-    settings: settings
+    settings: Settings
     google_client: GoogleClient
     yandex_client: YandexClient
 
@@ -44,6 +45,7 @@ class AuthService:
         )
         created = await self.user_repository.create_user(create_user_data)
         token = self.generate_access_token(user_id=created.id)
+        mail_client.send_welcome_email(to=user_data.email)
         return UserLoginSchema(user_id=created.id, access_token=token)
 
     async def yandex_auth(self, code: str) -> UserLoginSchema:
@@ -70,6 +72,7 @@ class AuthService:
         )
         created = await self.user_repository.create_user(create_user_data)
         token = self.generate_access_token(user_id=created.id)
+        mail_client.send_welcome_email(to=email)
         return UserLoginSchema(user_id=created.id, access_token=token)
 
     def get_google_redirect_url(self) -> str:
@@ -82,6 +85,8 @@ class AuthService:
         user = await self.user_repository.get_user_by_username(username)
         self._validate_auth_user(user, password)
         token = self.generate_access_token(user_id=user.id)
+        if user.email:
+            mail_client.send_welcome_email(to=user.email)
         return UserLoginSchema(user_id=user.id, access_token=token)
 
     @staticmethod
