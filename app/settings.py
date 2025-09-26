@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     EMAIL_VERIFICATION_EXPIRATION_MINUTES: int = 30
     APP_DOMAIN: str = "http://localhost:8000"
 
+    AI_API_URL: str = "https://api.x.ai/v1/chat/completions"
+    AI_API_KEY: str = ""
+
     @property
     def db_url(self):
         return f"{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

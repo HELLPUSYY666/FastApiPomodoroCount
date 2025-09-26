@@ -2,8 +2,10 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Dict
 
 from celery import Celery
+from celery.contrib.abortable import AbortableTask
 
 from app.settings import settings
 
@@ -36,3 +38,8 @@ def _send_message(msg: MIMEMultipart) -> None:
     server.login(settings.from_email, settings.SMTP_PASSWORD)
     server.send_message(msg=msg)
     server.quit()
+
+
+@celery.task(name="generate_ai_plan", bind=True, base=AbortableTask)
+def generate_ai_plan_task(requirements: str, progress_data: Dict[int]) -> None:
+    pass

@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import delete, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.future import select
@@ -59,3 +61,10 @@ class TaskRepository:
             result = await session.execute(query)
             task = result.scalar_one_or_none()
             return task
+
+    async def get_user_tasks(self, user_id: int) -> List[Task] | None:
+        queryset = select(Task).where(Task.user_id == user_id)
+        async with self.db_session_maker() as session:
+            result = await session.execute(queryset)
+            tasks = result.scalars().all()
+            return tasks
