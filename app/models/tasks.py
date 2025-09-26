@@ -26,13 +26,17 @@ class Task(Base):
     name: Mapped[str] = Column(String, nullable=False)
 
     status: Mapped[TaskStatusEnum] = Column(
-        Enum(TaskStatusEnum, name="task_status_enum"),
+        Enum(
+            TaskStatusEnum,
+            name="task_status_enum",
+            create_type=True,
+        ),
         nullable=False,
         default=TaskStatusEnum.NOT_START,
     )
 
     priority: Mapped[TaskPriorityEnum] = Column(
-        Enum(TaskPriorityEnum, name="task_priority_enum"),
+        Enum(TaskPriorityEnum, name="task_priority_enum", create_type=True),
         nullable=False,
         default=TaskPriorityEnum.MEDIUM,
     )

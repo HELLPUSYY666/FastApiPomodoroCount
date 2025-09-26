@@ -1,9 +1,12 @@
 from dataclasses import dataclass
+from typing import List
 
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import selectinload, with_loader_criteria
 
 from app.models import UserProfile
+from app.models.user import UsersPrompts
 from app.schema import UserCreateSchema
 
 
@@ -45,9 +48,30 @@ class UserRepository:
             result = await session.execute(query)
             return result.scalar_one_or_none()
 
+    async def get_user_by_id(self, user_id: int) -> UserProfile | None:
+        query = (
+            select(UserProfile)
+            .where(UserProfile.id == user_id)
+            .options(
+                selectinload(UserProfile.prompts),
+                with_loader_criteria(
+                    UsersPrompts, lambda cls: cls.currently_use == True
+                ),
+            )
+        )
+        async with self.session_maker() as session:
+            result = await session.execute(query)
+            return result.scalar_one_or_none()
+
     async def update_user(self, user: UserProfile):
         async with self.session_maker() as session:
             session.add(user)
             await session.commit()
             await session.refresh(user)
             return user
+
+    async def get_all_users(self) -> List[UserProfile]:
+        query = select(UserProfile)
+        async with self.session_maker() as session:
+            result = await session.execute(query)
+            return result.scalars().all()
