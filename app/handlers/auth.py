@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 from app.dependecy import get_auth_service
 from app.exception import UserNotCorrectPasswordException, UserNotFoundException
 from app.schema import UserCreateSchema, UserLoginSchema
+from app.schema.user import RegistrationResponseSchema
 from app.service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -22,6 +23,22 @@ async def login(
         raise HTTPException(status_code=404, detail=str(e))
     except UserNotCorrectPasswordException as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.post("/register", response_model=RegistrationResponseSchema)
+async def register_user(
+    body: UserCreateSchema,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+):
+    return await auth_service.register(user=body)
+
+
+@router.get("/verify")
+async def verify_user_email(
+    token: str,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+):
+    return await auth_service.verify(token=token)
 
 
 @router.get("/login/google", response_class=RedirectResponse)

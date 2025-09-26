@@ -44,3 +44,10 @@ class UserRepository:
         async with self.session_maker() as session:
             result = await session.execute(query)
             return result.scalar_one_or_none()
+
+    async def update_user(self, user: UserProfile):
+        async with self.session_maker() as session:
+            session.add(user)
+            await session.commit()
+            await session.refresh(user)
+            return user

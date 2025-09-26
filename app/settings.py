@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     SMTP_HOST: str = "smtp.mail.ru"
     SMTP_PASSWORD: str = "57ZdNKZrJR5wEBXEIlA8"
 
+    EMAIL_VERIFICATION_SECRET: str = "supersecretkey"
+    EMAIL_VERIFICATION_EXPIRATION_MINUTES: int = 30
+    APP_DOMAIN: str = "http://localhost:8000"
+
     @property
     def db_url(self):
         return f"{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

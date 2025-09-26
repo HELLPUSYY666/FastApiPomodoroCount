@@ -9,6 +9,8 @@ from jose import JWTError, jwt
 from app.client import GoogleClient, YandexClient
 from app.client.mail import MailClient as mail_client
 from app.exception import (
+    AlreadyExists,
+    EmailNotGiven,
     TokenExpiredException,
     TokenNotCorrectException,
     UserNotCorrectPasswordException,
@@ -18,6 +20,7 @@ from app.models import UserProfile
 from app.repository import UserRepository
 from app.schema import UserCreateSchema, UserLoginSchema
 from app.settings import Settings, settings
+from worker.celery import send_email_task
 
 
 @dataclass
@@ -89,12 +92,58 @@ class AuthService:
             mail_client.send_welcome_email(to=user.email)
         return UserLoginSchema(user_id=user.id, access_token=token)
 
+    async def register(self, user: UserCreateSchema):
+        exists_user = await self.user_repository.get_user_by_username(user.username)
+        if exists_user:
+            raise AlreadyExists(model_name="UserProfile")
+        new_user = await self.user_repository.create_user(user=user)
+        if new_user.email:
+            expiration = datetime.datetime.now(datetime.timezone.utc) + timedelta(
+                minutes=settings.EMAIL_VERIFICATION_EXPIRATION_MINUTES
+            )
+            token_data = {"sub": new_user.email, "exp": expiration}
+            token = jwt.encode(
+                token_data, settings.EMAIL_VERIFICATION_SECRET, algorithm="HS256"
+            )
+            verification_url = f"{settings.APP_DOMAIN}/auth/verify?token={token}"
+            send_email_task.delay(
+                subject="Подтверждение регистрации",
+                text=f"Привет! Чтобы подтвердить email, перейди по ссылке: {verification_url}",
+                to=user.email,
+            )
+
+            return {"msg": "User registered. Check your email for verification link."}
+        raise EmailNotGiven
+
+    async def verify(self, token: str):
+        try:
+            payload = jwt.decode(
+                token, settings.EMAIL_VERIFICATION_SECRET, algorithms=["HS256"]
+            )
+            email = payload.get("sub")
+            if not email:
+                raise HTTPException(status_code=400, detail="Invalid token")
+            user = await self.user_repository.get_user_by_email(email=email)
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+            if user.is_verified:
+                return {"msg": "Email already verified"}
+            user.is_verified = True
+            await self.user_repository.update_user(user)
+            return {"msg": "Email verified successfully"}
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=400, detail="Token expired")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=400, detail="Invalid token")
+
     @staticmethod
     def _validate_auth_user(user: UserProfile, password: str):
         if not user:
             raise UserNotFoundException
         if user.password != password:
             raise UserNotCorrectPasswordException
+        if not user.is_verified:
+            raise HTTPException(status_code=403, detail="Email not verified")
 
     def generate_access_token(self, user_id: int) -> str:
         expires_date_unix = (datetime.datetime.utcnow() + timedelta(days=7)).timestamp()

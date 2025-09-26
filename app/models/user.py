@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import Mapped
 
 from app.infrastructure.database.database import Base
@@ -15,3 +15,4 @@ class UserProfile(Base):
     yandex_access_token: Mapped[Optional[str]] = Column(String, nullable=True)
     email: Mapped[Optional[str]] = Column(String, nullable=True)
     name: Mapped[Optional[str]] = Column(String, nullable=True)
+    is_verified: Mapped[bool] = Column(Boolean, default=False)

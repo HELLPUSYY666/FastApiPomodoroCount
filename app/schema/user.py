@@ -15,3 +15,7 @@ class UserCreateSchema(BaseModel):
     yandex_access_token: Optional[str] = None
     email: Optional[str] = None
     name: str
+
+
+class RegistrationResponseSchema(BaseModel):
+    msg: str
